@@ -10,7 +10,7 @@
 <body>
 	<div id='main-container'>
 		<div id='weather-container'>
-		</div> 
+		</div>
 	</div>
 	<div id='side-container'>
 		<div>
@@ -23,7 +23,7 @@
 
 <script>
 		// USE YOUR OWN API KEY
-		const apiKey = "";
+		const apiKey = "d0d79c16fd19f54b967d7b74cf210642";
 
         // variable that stores the city that is chosen
 		let city;
@@ -51,8 +51,8 @@
 				let apiCall = `https://api.openweathermap.org/geo/1.0/direct?q=${searchInput},,US&limit=5&appid=${apiKey}`;
 				// calls the API
 				fetch(apiCall)
-					.then((response) => 
-						// after recieving a response, take the response from the server and convert it to JSON 
+					.then((response) =>
+						// after recieving a response, take the response from the server and convert it to JSON
 						response.json()
 					)
 					.then((data) => {
@@ -76,14 +76,14 @@
 					const li = document.createElement('li')
 					// sets the list item's class as search-result
 					li.setAttribute('class', 'search-result')
-					// sets the text inside the list item as the name and state of the city 
+					// sets the text inside the list item as the name and state of the city
 					const fullName = searchResult.name + ', ' + searchResult.state
 					li.innerHTML = fullName
 					// if the list item of a city is clicked, call the selectCity() function
 					li.addEventListener('click', () => selectCity(fullName, searchResult.name, searchResult.state, searchResult.lat, searchResult.lon))
 					// attaches the list item elements to search-results-list
 					ul.appendChild(li)
-			})	
+			})
 		}
 
 		// function that is called whenever a city has been selected
@@ -101,7 +101,19 @@
 			}
 			//printing the city object to the console
 			console.log(city);
-            // BEGIN CODING HERE
+			getWeather();
+
+
+		}
+
+		function getWeather() {
+		let apiCall = `https://api.openweathermap.org/data/2.5/forecast?lat=${city.lat}&lon=${city.lon}&appid=${apiKey}`;
+			fetch(apiCall)
+				.then((response) => response.json())
+				.then((data) => {
+					console.log(data)
+				})
+				.catch(error => console.log(error));
 		}
 	</script>
 </html>

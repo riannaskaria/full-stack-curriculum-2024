@@ -17,28 +17,54 @@
 </body>
 
 <script>
-		const apiKey = "";
+		const apiKey = "cf7c6c2fbdac6a7e9a024019fdbd7db0";
 
 		let temp;
 		let lat;
 		let lon;
 
 		function getData() {
-			let apiCall = ``;
+			let apiCall = `http://api.openweathermap.org/geo/1.0/direct?q=Austin,TX,USA&limit=5&appid=6dc87f0d902ad7e89bffc74e3ba537ef`;
 			// get lat and long
+			fetch(apiCall)
+				.then((response) => response.json())
+				.then((data) => {
+					console.log(data)
+
+					console.log(data[0])
+					console.log(data[0].lat)
+					lat = data[0].lat
+					lon = data[0].lon
+
+					renderLatLon()
+
+					getTemp()
+				})
 			// get temp
 		}
 
 		function renderLatLon() {
+			document.querySelector("#lat").innerHTML = "Latitude: " + lat
+			document.querySelector("#lon").innerHTML = "Latitude: " + lon
 		}
 
 		function getTemp() {
+			let apiCall = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=imperial`;
+			fetch(apiCall)
+				.then((response) => response,json())
+				.then((data) => {
+					console.log(data.main)
+
+					temp = data.main.temp
+					renderTemp()
+
+				}
+			)
+
 			
 		}
-
-        
 		function renderTemp() {
-		
+			document.querySelecter("#temp").innerHTML = "temperature: " + temp
 		}
 	</script>
 </html>
