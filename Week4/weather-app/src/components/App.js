@@ -1,11 +1,13 @@
 // App.js
 import React, { useState } from 'react';
 import '../styles/App.css';
+import dotenv from 'dotenv';
 
 import MainContainer from './MainContainer';
 import SideContainer from './SideContainer';
-
-const apiKey = '36ba1af3437c1d17d325a2d93e2f5979';
+dotenv.config();
+const apiKey = process.env.WEATHER_APP_KEY;
+console.log('line 9' + apiKey);
 
 function App() {
   // STEP 1: Use state to manage city data.
@@ -13,6 +15,8 @@ function App() {
 
   // STEP 2: Create a function to update the city data in the state.
   const updateSelectedCity = (cityData) => {
+    console.log('line 17' + apiKey);
+    console.log('updated')
     setSelectedCity(cityData);
   };
 
@@ -21,10 +25,11 @@ function App() {
       {/* STEP 3: Connect Components through Props. */}
 
       {/* Pass selectedCity to MainContainer to display the weather data */}
-      <MainContainer apiKey={apiKey} selectedCity={selectedCity} />
+      <MainContainer selectedCity={selectedCity} apiKey={apiKey}  />
 
       {/* Pass updateSelectedCity function to SideContainer to update the selected city */}
-      <SideContainer apiKey={apiKey} setSelectedCity={updateSelectedCity} />
+
+      <SideContainer updateSelectedCity={updateSelectedCity} apiKey={apiKey} />
     </div>
   );
 }

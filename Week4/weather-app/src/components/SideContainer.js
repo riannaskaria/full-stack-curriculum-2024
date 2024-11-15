@@ -2,13 +2,14 @@
 import React, { useState } from "react";
 import "../styles/SideContainer.css";
 
-function SideContainer({ setSelectedCity, apiKey }) {
-  const [searchResults, setSearchResults] = useState([]);
-
+function SideContainer({ props }) {
+ //const [searchResults, setSearchResults] = useState([]);
+ console.log(props)
   function search() {
     const searchInput = document.querySelector("#search-input").value;
     if (searchInput) {
-      const apiCall = `https://api.openweathermap.org/geo/1.0/direct?q=${searchInput},,US&limit=5&appid=${apiKey}`;
+      console.log('props', props)
+      const apiCall = `https://api.openweathermap.org/geo/1.0/direct?q=${searchInput},,US&limit=5&appid=${props.apiKey}`;
       fetch(apiCall)
         .then((response) => response.json())
         .then((data) => {
@@ -23,6 +24,7 @@ function SideContainer({ setSelectedCity, apiKey }) {
     ul.innerHTML = "";
 
     searchResults.forEach((searchResult, index) => {
+      console.log('reached')
       const li = document.createElement("li");
       li.setAttribute("class", "search-result");
       const fullName = searchResult.name + ", " + searchResult.state;
@@ -53,7 +55,7 @@ function SideContainer({ setSelectedCity, apiKey }) {
     };
 
     // Lift state up to App component
-    setSelectedCity(city);
+    props.updateSelectedCity(city)
   }
 
   return (
