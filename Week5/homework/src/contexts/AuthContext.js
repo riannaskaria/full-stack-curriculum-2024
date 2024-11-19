@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// Creating a context for authentication. Contexts provide a way to pass data through 
+// Creating a context for authentication. Contexts provide a way to pass data through
 // the component tree without having to pass props down manually at every level.
 const AuthContext = createContext();
 
@@ -15,23 +15,38 @@ export const useAuth = () => {
 // It uses the context to provide authentication-related data and functions to its children components.
 export function AuthProvider({ children }) {
     const navigate = useNavigate();
-    
-    
+
+    const [currentUser, setCurrentUser] = useState(localStorage.getItem("username"))
+    const [loginError, setLoginError] = useState(null);
+
+    const VALID_USERNAME = "rianna"
+    const VALID_PASSWORD = "racecar"
 
     // Login function that validates the provided username and password.
-    const login = () => {
-        
+    const login = (username, password) => {
+        if (username === VALID_USERNAME && password === VALID_PASSWORD) {
+            setCurrentUser(username)
+            localStorage.setItem('username', username)
+            navigate('/')
+         } else {
+            setLoginError('ERROR: FAILED TO THE LOGIN')
+         }
     };
 
     // Logout function to clear user data and redirect to the login page.
     const logout = () => {
-        
+        setCurrentUser(null)
+        localStorage.removeItem("username")
+        navigate('/login')
     };
 
     // An object containing our state and functions related to authentication.
     // By using this context, child components can easily access and use these without prop drilling.
     const contextValue = {
-        
+        currentUser,
+        login,
+        logout,
+        loginError
     };
 
     // The AuthProvider component uses the AuthContext.Provider to wrap its children.
