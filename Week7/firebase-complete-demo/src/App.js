@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
 import './App.css';
-<<<<<<< HEAD
-import { auth, googleProvider } from "./firebaseConfig"
+
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
-  signInWithPopup
-
-} from 'firebase/auth';
-=======
->>>>>>> upstream/main
+  signInWithPopup,
+  
+} from "firebase/auth";
+import { auth, googleProvider } from './firebaseConfig';
 
 function App() {
   // Separate state variables for login and signup
@@ -18,65 +16,48 @@ function App() {
   const [loginPassword, setLoginPassword] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null); // Holds the currently logged-in user object.
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    // TODO: Add Firebase login with email/password functionality here.
-<<<<<<< HEAD
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, loginEmail, loginPassword)
-      setUser(userCredential.user)
-      console.log("account created:", userCredential.user)
+      const userCredential = await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
+      setUser(userCredential.user);
+      console.log("Logged in:", userCredential.user);
     } catch (error) {
-      console.error("Sign in ERROR: ". error.message)
+      console.error("Login error:", error.message);
     }
-=======
->>>>>>> upstream/main
   };
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    // TODO: Add Firebase signup with email/password functionality here.
-<<<<<<< HEAD
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, signupEmail, signupPassword)
-      setUser(userCredential.user)
-      console.log("account created:", userCredential.user)
+      const userCredential = await createUserWithEmailAndPassword(auth, signupEmail, signupPassword);
+      setUser(userCredential.user);
+      console.log("Account created:", userCredential.user);
     } catch (error) {
-      console.error("SIGNUP ERROR: ". error.message)
+      console.error("Signup error:", error.message);
     }
-
-=======
->>>>>>> upstream/main
   };
 
   const handleGoogleSignIn = async () => {
-    // TODO: Add Firebase Google sign-in functionality here.
-<<<<<<< HEAD
     try {
-      const userCredential = await signInWithPopup(auth, googleProvider)
-      setUser(userCredential.user)
-      console.log("Google Log In:", userCredential.user)
+      const userCredential = await signInWithPopup(auth, googleProvider);
+      setUser(userCredential.user);
+      console.log("Google Sign-In successful:", userCredential.user);
     } catch (error) {
-      console.error("Google log in ERROR: ". error.message)
+      console.error("Google Sign-In error:", error.message);
     }
-=======
->>>>>>> upstream/main
   };
 
   const handleLogout = async () => {
-    // TODO: Add Firebase logout functionality here.
-<<<<<<< HEAD
     try {
-      await signOut(auth)
-      setUser(null)
-      console.log("Logged Out yess")
+      await signOut(auth);
+      setUser(null);
+      console.log("Logged out");
     } catch (error) {
-      console.error("SIGNUP ERROR: ". error.message)
+      console.error("Logout error:", error.message);
     }
-=======
->>>>>>> upstream/main
   };
 
   return (

@@ -18,8 +18,9 @@ const creds = JSON.parse(process.env.FIREBASE_CREDENTIALS);
 // Initializing Firebase Admin SDK with credentials and database URL
 admin.initializeApp({
   credential: admin.credential.cert(creds),
-  databaseURL: "https://tpeo-todo.firebaseio.com",  // TODO: replace with your database URL
+  databaseURL: "https://to-do-app.firebaseio.com",  // TODO: replace with your database URL
 });
+const app = express();
 
 const db = admin.firestore();
 
