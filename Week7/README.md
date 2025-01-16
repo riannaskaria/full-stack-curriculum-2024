@@ -22,7 +22,7 @@ Next, you need to have Firebase installed in your project:
 npm install firebase
 ```
 
-You will be changing BOTH the frontend and backend sections of your code! So make sure the firebase is installed on your frontend, and firebase-admin is installed on your backend. 
+You will be changing BOTH the frontend and backend sections of your code! So make sure the firebase is installed on your frontend, and firebase-admin is installed on your backend.
 
 ## Frontend Changes
 

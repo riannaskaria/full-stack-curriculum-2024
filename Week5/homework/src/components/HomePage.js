@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Typography,
@@ -12,8 +12,8 @@ import {
   Grid,
 } from "@mui/material";
 import Header from "./Header";
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -25,81 +25,89 @@ export default function HomePage() {
   // State for the task name being entered by the user.
   const [newTaskName, setNewTaskName] = useState("");
 
+  // Fetch tasks from the API
   useEffect(() => {
-    if (!currentUser) {
-      navigate('/login');
+    if (!currentUser.email) {
+      navigate("/login");
     } else {
-      fetch(`https://tpeo-todo.vercel.app/tasks/${currentUser}`)
-      .then(response => response.json())
-      .then(data => {
-        setTaskList(data);
-      })
-      .catch(error => {
-        console.error('Failed to fetch:', error);
-      })
+      fetch(`${process.env.REACT_APP_BACKEND}/tasks/${currentUser.email}`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Failed to fetch tasks: ${response.statusText}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          console.log("Fetched tasks:", data); // Log the fetched tasks
+          setTaskList(data); // Set the tasks to state
+        })
+        .catch((error) => {
+          console.error("Error fetching tasks:", error);
+        });
     }
-  }, [currentUser]);
+  }, [currentUser, navigate]);
 
-  // TODO: Support retrieving your todo list from the API.
-  // Currently, the tasks are hardcoded. You'll need to make an API call
-  // to fetch the list of tasks instead of using the hardcoded data.
-
+  // Add a new task
   function handleAddTask() {
-    // Check if task name is provided and if it doesn't already exist.
-    if (newTaskName && !taskList.some((task) => task.name === newTaskName)) {
+    if (newTaskName && !taskList.some((task) => task.text === newTaskName)) {
+      if (!currentUser) {
+        console.error("User ID is not available");
+        return; // Don't proceed if user ID is missing
+      }
 
-      // TODO: Support adding todo items to your todo list through the API.
-      // In addition to updating the state directly, you should send a request
-      // to the API to add a new task and then update the state based on the response.
-
-      fetch('https://tpeo-todo.vercel.app/tasks/', {
-        method: 'POST',
+      fetch(`${process.env.REACT_APP_BACKEND}/tasks`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          user: currentUser,
-          name: newTaskName,
-          finished: false,
+          userId: currentUser.email,
+          text: newTaskName,
+          completed: false,
         }),
       })
-      .then(response => response.json())
-      .then(data => {
-        setTaskList([...taskList, data]);
-        setNewTaskName("");
-      })
-      .catch(error => {
-        console.error('Failed to post:', error);
-      })
-    } else if (taskList.some((task) => task.name === newTaskName)) {
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Failed to add task: ${response.statusText}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          setTaskList([...taskList, data]); // Update the task list
+          setNewTaskName(""); // Clear the input field
+        })
+        .catch((error) => {
+          console.error("Failed to add task:", error);
+        });
+    } else if (taskList.some((task) => task.text === newTaskName)) {
       alert("Task already exists!");
     }
   }
 
-  // Function to toggle the 'finished' status of a task.
+  // Toggle task completion
   function toggleTaskCompletion(task) {
-    // TODO: Support removing/checking off todo items in your todo list through the API.
-    // Similar to adding tasks, when checking off a task, you should send a request
-    // to the API to update the task's status and then update the state based on the response.
-
-    fetch(`https://tpeo-todo.vercel.app/tasks/${task.id}`, {
-      method: 'DELETE'
+    fetch(`${process.env.REACT_APP_BACKEND}/tasks/${currentUser.email}/${task.id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
     })
-      .then(response => response.json())
-      .then(() => {
-        const updatedTaskList = taskList.filter((existingTask) => existingTask.id !== task.id);
-        setTaskList(updatedTaskList);
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Failed to delete task: ${response.statusText}`);
+        }
+        // Update the state to remove the deleted task
+        setTaskList(taskList.filter((existingTask) => existingTask.id !== task.id));
       })
-      .catch(error => {
-        console.error('Failed to delete:', error);
-      })
+      .catch((error) => console.error("Failed to delete task:", error));
   }
 
-  // Function to compute a message indicating how many tasks are unfinished.
+
+  // Get a message for the number of unfinished tasks
   function getUnfinishedTaskMessage() {
-    const unfinishedTasks = taskList.filter((task) => !task.finished).length;
+    const unfinishedTasks = taskList.filter((task) => !task.completed).length;
     return unfinishedTasks === 1
-      ? `You have 1 unfinished task`
+      ? "You have 1 unfinished task"
       : `You have ${unfinishedTasks} tasks left to do`;
   }
 
@@ -107,7 +115,6 @@ export default function HomePage() {
     <>
       <Header />
       <Container component="main" maxWidth="sm">
-        {/* Main layout and styling for the ToDo app. */}
         <Box
           sx={{
             marginTop: 8,
@@ -116,7 +123,6 @@ export default function HomePage() {
             alignItems: "center",
           }}
         >
-          {/* Display the unfinished task summary */}
           <Typography variant="h4" component="div" fontWeight="bold">
             {getUnfinishedTaskMessage()}
           </Typography>
@@ -130,7 +136,6 @@ export default function HomePage() {
               justifyContent: "center",
             }}
           >
-            {/* Input and button to add a new task */}
             <Grid
               container
               spacing={2}
@@ -141,7 +146,7 @@ export default function HomePage() {
                 <TextField
                   fullWidth
                   variant="outlined"
-                  size="small" // makes the textfield smaller
+                  size="small"
                   value={newTaskName}
                   placeholder="Type your task here"
                   onChange={(event) => setNewTaskName(event.target.value)}
@@ -158,18 +163,14 @@ export default function HomePage() {
                 </Button>
               </Grid>
             </Grid>
-            {/* List of tasks */}
             <List sx={{ marginTop: 3 }}>
               {taskList.map((task) => (
-                <ListItem
-                  key={task.name}
-                  dense
-                >
+                <ListItem key={task.id} dense>
                   <Checkbox
-                    checked={task.finished}
+                    checked={task.completed}
                     onChange={() => toggleTaskCompletion(task)}
                   />
-                  <ListItemText primary={task.name} />
+                  <ListItemText primary={task.text} />
                 </ListItem>
               ))}
             </List>

@@ -9,21 +9,31 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 function LoginPage() {
-  // Access the MUI theme for potential theme-related functionalities.
   const theme = useTheme();
-
-  // TODO: Extract login function and error from our authentication context.
-  const { loginError, login } = useAuth();
-
-  // State to hold the username and password entered by the user.
+  const navigate = useNavigate(); // Initialize the navigation function
+  const { login, loginError, register } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  // TODO: Handle login function.
-  const handleLogin = () => {
-    login(username, password);
+  const handleLogin = async () => {
+    try {
+      await login(username, password); // Wait for login to complete
+      navigate("/dashboard"); // Navigate to dashboard after login
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
+  };
+
+  const handleRegister = async () => {
+    try {
+      await register(username, password); // Wait for registration to complete
+      navigate("/welcome"); // Navigate to a welcome page after registration
+    } catch (error) {
+      console.error("Registration failed:", error);
+    }
   };
 
   return (
@@ -86,13 +96,18 @@ function LoginPage() {
           >
             Login
           </Button>
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            sx={{ mt: 3, mb: 2 }}
+            onClick={handleRegister}
+          >
+            Register
+          </Button>
         </Box>
-        {/* TODO: Display Login Error if it exists */}
-        {loginError && (
-          <Alert severity="error">
-            {loginError}
-          </Alert>
-        )}
+        {loginError && <Alert severity="error">{loginError}</Alert>}
       </Box>
     </Container>
   );
