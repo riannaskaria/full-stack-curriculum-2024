@@ -1,6 +1,7 @@
 {
   "name": "homework",
   "version": "0.1.0",
+  "homepage":"https://to-do-backend-self.vercel.app/" ,
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.11.1",
