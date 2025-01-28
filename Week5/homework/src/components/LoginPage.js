@@ -21,7 +21,6 @@ function LoginPage() {
   const handleLogin = async () => {
     try {
       await login(username, password); // Wait for login to complete
-      navigate("/dashboard"); // Navigate to dashboard after login
     } catch (error) {
       console.error("Login failed:", error);
     }
@@ -30,7 +29,6 @@ function LoginPage() {
   const handleRegister = async () => {
     try {
       await register(username, password); // Wait for registration to complete
-      navigate("/welcome"); // Navigate to a welcome page after registration
     } catch (error) {
       console.error("Registration failed:", error);
     }
