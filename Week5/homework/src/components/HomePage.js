@@ -27,7 +27,7 @@ export default function HomePage() {
 
   // Fetch tasks from the API
   useEffect(() => {
-    if (!currentUser.email) {
+    if (!currentUser) {
       navigate("/login");
     } else {
       fetch(`${process.env.REACT_APP_BACKEND}/tasks/${currentUser.email}`)
