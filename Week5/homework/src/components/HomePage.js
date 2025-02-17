@@ -2,100 +2,180 @@ import React, { useState, useEffect } from "react";
 import {
   Container,
   Typography,
-  Box,
   TextField,
   Button,
   List,
   ListItem,
   ListItemText,
-  IconButton,
+  Checkbox,
+  Box,
+  Grid,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
+import Header from "./Header";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
-const BACKEND_URL = "https://to-do-backend-self.vercel.app";
-
-function HomePage() {
+export default function HomePage() {
+  const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const [tasks, setTasks] = useState([]);
-  const [newTask, setNewTask] = useState("");
 
+  // State to hold the list of tasks.
+  const [taskList, setTaskList] = useState([]);
+
+  // State for the task name being entered by the user.
+  const [newTaskName, setNewTaskName] = useState("");
+
+  // Fetch tasks from the API
   useEffect(() => {
-    fetchTasks();
-  }, []);
-
-  const fetchTasks = async () => {
-    try {
-      const response = await fetch(`${BACKEND_URL}/tasks?user=${currentUser?.email}`);
-      const data = await response.json();
-      setTasks(data);
-    } catch (error) {
-      console.error("Error fetching tasks:", error);
+    if (!currentUser) {
+      navigate("/login");
+    } else {
+      fetch(`${process.env.REACT_APP_BACKEND}/tasks/${currentUser.email}`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Failed to fetch tasks: ${response.statusText}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          console.log("Fetched tasks:", data); // Log the fetched tasks
+          setTaskList(data); // Set the tasks to state
+        })
+        .catch((error) => {
+          console.error("Error fetching tasks:", error);
+        });
     }
-  };
+  }, [currentUser, navigate]);
 
-  const addTask = async () => {
-    if (!newTask.trim()) return;
-    try {
-      const response = await fetch(`${BACKEND_URL}/tasks`, {
+  // Add a new task
+  function handleAddTask() {
+    if (newTaskName && !taskList.some((task) => task.text === newTaskName)) {
+      if (!currentUser) {
+        console.error("User ID is not available");
+        return; // Don't proceed if user ID is missing
+      }
+
+      fetch(`${process.env.REACT_APP_BACKEND}/tasks`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user: currentUser?.email, task: newTask }),
-      });
-      if (response.ok) {
-        setNewTask("");
-        fetchTasks();
-      }
-    } catch (error) {
-      console.error("Error adding task:", error);
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          "userId": currentUser.email, // Wrapped in double quotes
+          "text": newTaskName, // Wrapped in double quotes
+          "completed": false, // Wrapped in double quotes
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Failed to add task: ${response.statusText}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          setTaskList([...taskList, data]); // Update the task list
+          setNewTaskName(""); // Clear the input field
+        })
+        .catch((error) => {
+          console.error("Failed to add task:", error);
+        });
+    } else if (taskList.some((task) => task.text === newTaskName)) {
+      alert("Task already exists!");
     }
-  };
+  }
 
-  const deleteTask = async (taskId) => {
-    try {
-      const response = await fetch(`${BACKEND_URL}/tasks/${taskId}`, {
-        method: "DELETE",
-      });
-      if (response.ok) {
-        fetchTasks();
-      }
-    } catch (error) {
-      console.error("Error deleting task:", error);
-    }
-  };
+  // Toggle task completion
+  function toggleTaskCompletion(task) {
+    fetch(`${process.env.REACT_APP_BACKEND}/tasks/${currentUser.email}/${task.id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Failed to delete task: ${response.statusText}`);
+        }
+        // Update the state to remove the deleted task
+        setTaskList(taskList.filter((existingTask) => existingTask.id !== task.id));
+      })
+      .catch((error) => console.error("Failed to delete task:", error));
+  }
+
+  // Get a message for the number of unfinished tasks
+  function getUnfinishedTaskMessage() {
+    const unfinishedTasks = taskList.filter((task) => !task.completed).length;
+    return unfinishedTasks === 1
+      ? "You have 1 unfinished task"
+      : `You have ${unfinishedTasks} tasks left to do`;
+  }
 
   return (
-    <Container>
-      <Box sx={{ mt: 4, textAlign: "center" }}>
-        <Typography variant="h4" fontWeight="bold">
-          {currentUser ? `${currentUser.email}'s To-Do List` : "Guest's To-Do List"}
-        </Typography>
-      </Box>
-      <Box sx={{ mt: 2, display: "flex", gap: 1 }}>
-        <TextField
-          fullWidth
-          label="New Task"
-          variant="outlined"
-          value={newTask}
-          onChange={(e) => setNewTask(e.target.value)}
-        />
-        <Button variant="contained" color="primary" onClick={addTask}>
-          Add
-        </Button>
-      </Box>
-      <List sx={{ mt: 2 }}>
-        {tasks.map((task) => (
-          <ListItem key={task.id} secondaryAction={
-            <IconButton edge="end" onClick={() => deleteTask(task.id)}>
-              <DeleteIcon color="error" />
-            </IconButton>
-          }>
-            <ListItemText primary={task.task} />
-          </ListItem>
-        ))}
-      </List>
-    </Container>
+    <>
+      <Header />
+      <Container component="main" maxWidth="sm">
+        <Box
+          sx={{
+            marginTop: 8,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Typography variant="h4" component="div" fontWeight="bold">
+            {getUnfinishedTaskMessage()}
+          </Typography>
+          <Box
+            sx={{
+              width: "100%",
+              marginTop: 3,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Grid
+              container
+              spacing={2}
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Grid item xs={6}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  value={newTaskName}
+                  placeholder="Type your task here"
+                  onChange={(event) => setNewTaskName(event.target.value)}
+                />
+              </Grid>
+              <Grid item xs={2}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleAddTask}
+                  fullWidth
+                >
+                  Add
+                </Button>
+              </Grid>
+            </Grid>
+            <List sx={{ marginTop: 3 }}>
+              {taskList.map((task) => (
+                <ListItem key={task.id} dense>
+                  <Checkbox
+                    checked={task.completed}
+                    onChange={() => toggleTaskCompletion(task)}
+                  />
+                  <ListItemText primary={task.text} />
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+        </Box>
+      </Container>
+    </>
   );
 }
-
-export default HomePage;
